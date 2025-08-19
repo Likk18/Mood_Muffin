@@ -4,7 +4,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from flask import session, url_for
 
-SCOPE = "user-top-read user-read-private user-modify-playback-state user-read-playback-state user-library-read user-library-modify playlist-modify-public playlist-modify-private"
+SCOPE = "user-top-read user-read-private user-modify-playback-state user-read-playback-state user-library-read user-library-modify playlist-modify-public playlist-modify-private streaming user-read-email"
 
 def get_spotify_oauth():
     """
