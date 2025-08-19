@@ -103,7 +103,7 @@ def get_token():
 def play_song():
     """
     Plays a specific playlist on a specific device.
-    Important: transfer playback to the Web SDK device to avoid 5s cutoffs.
+    Fix: Only transfer playback if not already on the correct device.
     """
     sp_client = get_spotify_client()
     if not sp_client:
@@ -117,13 +117,20 @@ def play_song():
         if not playlist_uri or not device_id:
             return jsonify({'error': 'Playlist URI and Device ID are required.'}), 400
 
-        # 1) Transfer playback to the Web Playback SDK device
-        sp_client.transfer_playback(device_id=device_id, force_play=True)
+        # --- Step 1: Check current playback state
+        current_playback = sp_client.current_playback()
+        active_device_id = current_playback.get('device', {}).get('id') if current_playback else None
 
-        # 2) Start playback using playlist context on that same device
+        # --- Step 2: Transfer only if needed
+        if active_device_id != device_id:
+            sp_client.transfer_playback(device_id=device_id, force_play=False)
+
+        # --- Step 3: Start playback on the correct device
         sp_client.start_playback(device_id=device_id, context_uri=playlist_uri)
 
         return jsonify({'status': 'success'})
+
     except Exception as e:
         print(f"A critical error occurred in /play: {e}")
         return jsonify({'error': f'Could not start playback: {str(e)}'}), 500
+
